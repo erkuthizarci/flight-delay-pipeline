@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: flights
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  spark:
+    image: bitnami/spark:latest
+    container_name: spark
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8080:8080"  # Spark Web UI
+      - "7077:7077"  # Spark master port
+
+  ingest:
+    build: ./ingest
+    volumes:
+      - ./data:/data
+    depends_on:
+      - db
+
+  preprocess:
+    build: ./preprocess
+    volumes:
+      - ./data:/data
+    depends_on:
+      - ingest
+
+  aggregate:
+    build: ./aggregate
+    volumes:
+      - ./data:/data
+    depends_on:
+      - preprocess
+
+  spark_runner:
+    build: ./spark
+    volumes:
+      - ./data:/data
+    depends_on:
+      - spark
+
+volumes:
+  pgdata:
