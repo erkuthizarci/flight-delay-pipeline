@@ -36,7 +36,7 @@ All services are run as Docker containers and orchestrated using `docker-compose
 3. Clone the repository and navigate to the folder.
 
 ```bash
-git clone <your-repo-link>
+git clone https://github.com/erkuthizarci/flight-delay-pipeline.git
 cd flight-delay-pipeline
 
 4. Build all containers:
